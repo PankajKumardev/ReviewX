@@ -28,10 +28,11 @@ public class FileStats {
         stats.addProperty("blankLines", blankLines);
         stats.addProperty("longestLine", longestLine);
 
-        // Add the numbers to the same JSON reply that holds the AI review.
+        // Add file stats and code notes to the AI review.
         try {
             JsonObject result = JsonParser.parseString(review).getAsJsonObject();
             result.add("fileStats", stats);
+            result.add("codeNotes", CodeNotes.find(lines));
             return result.toString();
         } catch (RuntimeException error) {
             throw new IOException("Groq sent an unreadable review. Try again.", error);

@@ -13,12 +13,16 @@ export type ReviewData = {
     blankLines: number;
     longestLine: number;
   };
+  codeNotes: {
+    total: number;
+    matches: { lineNumber: number; text: string }[];
+  };
 };
 
 export function isReview(value: unknown): value is ReviewData {
   if (!value || typeof value !== "object") return false;
 
-  const { summary, points, cleanedCode, fileStats } = value as Partial<ReviewData>;
+  const { summary, points, cleanedCode, fileStats, codeNotes } = value as Partial<ReviewData>;
   return typeof summary === "string" && Boolean(summary.trim())
     && Array.isArray(points) && points.length >= 4 && points.length <= 5
     && points.every((point) => typeof point?.title === "string" && Boolean(point.title.trim())
@@ -26,7 +30,10 @@ export function isReview(value: unknown): value is ReviewData {
     && typeof cleanedCode === "string"
     && Number.isInteger(fileStats?.totalLines)
     && Number.isInteger(fileStats?.blankLines)
-    && Number.isInteger(fileStats?.longestLine);
+    && Number.isInteger(fileStats?.longestLine)
+    && Number.isInteger(codeNotes?.total)
+    && Array.isArray(codeNotes?.matches)
+    && codeNotes.matches.every((note) => Number.isInteger(note?.lineNumber) && typeof note.text === "string");
 }
 
 export function ReviewResult({ review }: { review: ReviewData }) {
@@ -62,6 +69,25 @@ export function ReviewResult({ review }: { review: ReviewData }) {
             </div>
           </dl>
         </div>
+
+        {review.codeNotes.total > 0 && (
+          <details className="mb-4 rounded-md border border-border px-3 py-2.5">
+            <summary className="cursor-pointer text-sm font-semibold">
+              TODO &amp; FIXME lines ({review.codeNotes.total})
+            </summary>
+            <ul className="mt-2 max-h-48 divide-y divide-border overflow-auto">
+              {review.codeNotes.matches.map((note) => (
+                <li key={note.lineNumber} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 py-2 text-xs">
+                  <span className="font-medium text-highlight">Line {note.lineNumber}</span>
+                  <code className="font-mono break-all">{note.text}</code>
+                </li>
+              ))}
+            </ul>
+            {review.codeNotes.total > review.codeNotes.matches.length && (
+              <p className="mt-1 text-xs text-muted-foreground">Showing the first five matching lines.</p>
+            )}
+          </details>
+        )}
 
         <div className="rounded-md bg-muted px-4 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-x-3">
