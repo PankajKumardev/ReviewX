@@ -1,20 +1,20 @@
 # Java concepts used
 
-- Exception handling (`try`, `catch`, `throw`, `throws`)
-- Classes and objects
-- Constructors and `this`
-- Encapsulation (`private`, `final`)
-- Interfaces, method overriding, and polymorphism
-- Packages and imports
-- Variables, data types, and operators
-- Methods and parameters
-- Conditional statements (`if`)
-- For-each loops
-- Arrays (`byte[]`)
-- Collections and generics (`List<String>`)
-- Streams (`String.lines()`, `toList()`)
-- String handling and concatenation
-- Standard input, output, and error streams
-- File I/O (`Files.readString()`)
-- HTTP requests and responses (`HttpClient`)
-- JSON parsing with Gson
+- **Exception handling** — `throw` rejects invalid uploads, `catch` prints the error, and `throws` declares errors a reviewer can pass back. [Upload checks](src/reviewx/Main.java#L8-L29), [reviewer method](src/reviewx/Reviewer.java#L7)
+- **Classes and objects** — `new GroqReviewer(apiKey)` creates the object that calls Groq. [Create the reviewer](src/reviewx/Main.java#L22-L24)
+- **Constructors and `this`** — The constructor saves the key in the current object's `this.apiKey` field. [Reviewer constructor](src/reviewx/GroqReviewer.java#L18-L20)
+- **Encapsulation** — The reviewer keeps the key in a `private final` field. [API key field](src/reviewx/GroqReviewer.java#L15-L19)
+- **Interfaces, method overriding, and polymorphism** — `Reviewer` declares `review()`. `GroqReviewer` implements it with `@Override`, and Java runs that implementation when called through a `Reviewer` variable. [Interface](src/reviewx/Reviewer.java#L5-L8), [implementation](src/reviewx/GroqReviewer.java#L15-L26), [method call](src/reviewx/Main.java#L22-L24)
+- **Packages and imports** — The project uses the `reviewx` package and imports types from Java and Gson. [Package and imports](src/reviewx/GroqReviewer.java#L1-L13)
+- **Variables, data types, and operators** — An `int` holds the file limit, `*` calculates it in bytes, and `>` checks the upload size. [File-size check](src/reviewx/Main.java#L9-L13)
+- **Methods and parameters** — `addToReview(String fileText, String review)` receives the uploaded text and the AI review. [Method declaration](src/reviewx/FileStats.java#L9-L12)
+- **Conditional statements** — `if` checks whether a line is blank or longer than the longest line seen so far. [Line checks](src/reviewx/FileStats.java#L17-L24)
+- **For-each loops** — One loop checks each file line. Another adds each review point to the download. [File stats loop](src/reviewx/FileStats.java#L17-L24), [report loop](src/reviewx/ReviewText.java#L19-L27)
+- **Arrays** — A `byte[]` holds the uploaded file before Java converts it to text. [Read upload bytes](src/reviewx/Main.java#L9-L16)
+- **Collections and generics** — A `List<String>` holds the file lines and supplies the total through `size()`. [Line list](src/reviewx/FileStats.java#L10-L14), [total lines](src/reviewx/FileStats.java#L26-L30)
+- **Streams** — `String.lines()` produces a stream of lines, and `toList()` collects them. [Split and collect the lines](src/reviewx/FileStats.java#L12)
+- **String handling and concatenation** — Java decodes the upload as UTF-8 and joins strings with `+` and `+=` to build the report. [Decode the file](src/reviewx/Main.java#L16), [build the report](src/reviewx/ReviewText.java#L10-L17)
+- **Standard input, output, and error streams** — `System.in` reads the upload, `System.out` prints the review, and `System.err` prints errors. [Read the upload](src/reviewx/Main.java#L11), [print the result or error](src/reviewx/Main.java#L24-L29)
+- **File I/O** — `Files.readString()` reads the saved Groq request template from disk. [Read the template](src/reviewx/GroqReviewer.java#L38-L41)
+- **HTTP requests and responses** — `HttpRequest` builds the Groq POST request, `HttpClient` sends it, and `HttpResponse` provides the status and reply. [Build the request](src/reviewx/GroqReviewer.java#L47-L53), [send and check the reply](src/reviewx/GroqReviewer.java#L29-L35)
+- **JSON parsing with Gson** — `JsonParser` reads the Groq response, and Java extracts the review from its first choice. [Parse the response](src/reviewx/GroqReviewer.java#L56-L65)
