@@ -1,6 +1,6 @@
 # ReviewX
 
-Upload one source or text file and get a short summary, four or five review points, and copyable code. Java reads the file text and calls Groq. The Next.js page shows the review.
+Upload one source or text file and get a short summary, four or five review points, and copyable code. Java reads the file text, calls Groq, and counts the total lines, blank lines, and longest line. The Next.js page shows the stats and review.
 
 ## Run it
 
@@ -26,6 +26,7 @@ The `<` tells the terminal to give Java the file as input. You’ll see the same
 1. **`Main.java`** reads the file from standard input, turns the bytes into a string, calls the reviewer, and prints the result.
 2. **`Reviewer.java`** is an interface. Its one method says what a reviewer takes in and sends back.
 3. **`GroqReviewer.java`** stores the key in its constructor, sends the instructions and file text to Groq, and reads the response. The prompt and the expected response fields live in `groq-request.json`.
+4. **`FileStats.java`** uses a list and a loop to count lines and adds the three numbers to the review.
 
 The only library used by Java is Gson, which handles JSON. Next.js starts Java when a file arrives and reads the program’s output.
 

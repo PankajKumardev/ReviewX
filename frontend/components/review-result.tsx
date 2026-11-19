@@ -8,17 +8,25 @@ export type ReviewData = {
   summary: string;
   points: { title: string; detail: string }[];
   cleanedCode: string;
+  fileStats: {
+    totalLines: number;
+    blankLines: number;
+    longestLine: number;
+  };
 };
 
 export function isReview(value: unknown): value is ReviewData {
   if (!value || typeof value !== "object") return false;
 
-  const { summary, points, cleanedCode } = value as Partial<ReviewData>;
+  const { summary, points, cleanedCode, fileStats } = value as Partial<ReviewData>;
   return typeof summary === "string" && Boolean(summary.trim())
     && Array.isArray(points) && points.length >= 4 && points.length <= 5
     && points.every((point) => typeof point?.title === "string" && Boolean(point.title.trim())
       && typeof point.detail === "string" && Boolean(point.detail.trim()))
-    && typeof cleanedCode === "string";
+    && typeof cleanedCode === "string"
+    && Number.isInteger(fileStats?.totalLines)
+    && Number.isInteger(fileStats?.blankLines)
+    && Number.isInteger(fileStats?.longestLine);
 }
 
 export function ReviewResult({ review }: { review: ReviewData }) {
@@ -37,6 +45,24 @@ export function ReviewResult({ review }: { review: ReviewData }) {
   return (
     <div className={code ? "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}>
       <div className="min-w-0 rounded-lg border border-border bg-card px-4 py-4 sm:px-5">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold">File stats</h3>
+          <dl className="mt-2 grid grid-cols-3 gap-2">
+            <div className="min-w-0 rounded-md bg-muted p-2.5">
+              <dt className="text-xs text-muted-foreground">Total lines</dt>
+              <dd className="mt-1 font-mono text-sm font-semibold">{review.fileStats.totalLines}</dd>
+            </div>
+            <div className="min-w-0 rounded-md bg-muted p-2.5">
+              <dt className="text-xs text-muted-foreground">Blank lines</dt>
+              <dd className="mt-1 font-mono text-sm font-semibold">{review.fileStats.blankLines}</dd>
+            </div>
+            <div className="min-w-0 rounded-md bg-muted p-2.5">
+              <dt className="text-xs text-muted-foreground">Longest line</dt>
+              <dd className="mt-1 font-mono text-sm font-semibold">{review.fileStats.longestLine} chars</dd>
+            </div>
+          </dl>
+        </div>
+
         <div className="rounded-md bg-muted px-4 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-x-3">
             <h3 className="text-sm font-semibold">Summary</h3>

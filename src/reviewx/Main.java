@@ -22,7 +22,7 @@ public class Main {
             String apiKey = System.getenv("GROQ_API_KEY");
             Reviewer reviewer = new GroqReviewer(apiKey);
             String review = reviewer.review(fileText);
-            System.out.print(review);
+            System.out.print(FileStats.addToReview(fileText, review));
         } catch (IOException | InterruptedException error) {
             // Print errors separately so Next.js can tell them apart from the review.
             System.err.println(error.getMessage());
