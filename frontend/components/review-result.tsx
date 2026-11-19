@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, Check, CodeXml, Copy } from "lucide-react";
+import { ArrowDown, Check, CodeXml, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type ReviewData = {
@@ -10,19 +10,17 @@ export type ReviewData = {
   cleanedCode: string;
   fileStats: {
     totalLines: number;
+    nonBlankLines: number;
     blankLines: number;
     longestLine: number;
   };
-  codeNotes: {
-    total: number;
-    matches: { lineNumber: number; text: string }[];
-  };
+  reportText: string;
 };
 
 export function isReview(value: unknown): value is ReviewData {
   if (!value || typeof value !== "object") return false;
 
-  const { summary, points, cleanedCode, fileStats, codeNotes } = value as Partial<ReviewData>;
+  const { summary, points, cleanedCode, fileStats, reportText } = value as Partial<ReviewData>;
   return typeof summary === "string" && Boolean(summary.trim())
     && Array.isArray(points) && points.length >= 4 && points.length <= 5
     && points.every((point) => typeof point?.title === "string" && Boolean(point.title.trim())
@@ -31,14 +29,25 @@ export function isReview(value: unknown): value is ReviewData {
     && Number.isInteger(fileStats?.totalLines)
     && Number.isInteger(fileStats?.blankLines)
     && Number.isInteger(fileStats?.longestLine)
-    && Number.isInteger(codeNotes?.total)
-    && Array.isArray(codeNotes?.matches)
-    && codeNotes.matches.every((note) => Number.isInteger(note?.lineNumber) && typeof note.text === "string");
+    && Number.isInteger(fileStats?.nonBlankLines)
+    && typeof reportText === "string";
 }
 
 export function ReviewResult({ review }: { review: ReviewData }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "done" | "error">("idle");
   const code = review.cleanedCode.trimEnd().replace(/^```[^\n]*\n([\s\S]*?)\n```$/, "$1");
+
+  function downloadReview() {
+    const file = new Blob([review.reportText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "reviewx-review.txt";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 
   async function copyCode() {
     try {
@@ -53,11 +62,21 @@ export function ReviewResult({ review }: { review: ReviewData }) {
     <div className={code ? "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}>
       <div className="min-w-0 rounded-lg border border-border bg-card px-4 py-4 sm:px-5">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold">File stats</h3>
-          <dl className="mt-2 grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold">File stats</h3>
+            <Button type="button" size="sm" variant="outline" onClick={downloadReview}>
+              <Download aria-hidden="true" />
+              Download review
+            </Button>
+          </div>
+          <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="min-w-0 rounded-md bg-muted p-2.5">
               <dt className="text-xs text-muted-foreground">Total lines</dt>
               <dd className="mt-1 font-mono text-sm font-semibold">{review.fileStats.totalLines}</dd>
+            </div>
+            <div className="min-w-0 rounded-md bg-muted p-2.5">
+              <dt className="text-xs text-muted-foreground">Non-blank lines</dt>
+              <dd className="mt-1 font-mono text-sm font-semibold">{review.fileStats.nonBlankLines}</dd>
             </div>
             <div className="min-w-0 rounded-md bg-muted p-2.5">
               <dt className="text-xs text-muted-foreground">Blank lines</dt>
@@ -69,25 +88,6 @@ export function ReviewResult({ review }: { review: ReviewData }) {
             </div>
           </dl>
         </div>
-
-        {review.codeNotes.total > 0 && (
-          <details className="mb-4 rounded-md border border-border px-3 py-2.5">
-            <summary className="cursor-pointer text-sm font-semibold">
-              TODO &amp; FIXME lines ({review.codeNotes.total})
-            </summary>
-            <ul className="mt-2 max-h-48 divide-y divide-border overflow-auto">
-              {review.codeNotes.matches.map((note) => (
-                <li key={note.lineNumber} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 py-2 text-xs">
-                  <span className="font-medium text-highlight">Line {note.lineNumber}</span>
-                  <code className="font-mono break-all">{note.text}</code>
-                </li>
-              ))}
-            </ul>
-            {review.codeNotes.total > review.codeNotes.matches.length && (
-              <p className="mt-1 text-xs text-muted-foreground">Showing the first five matching lines.</p>
-            )}
-          </details>
-        )}
 
         <div className="rounded-md bg-muted px-4 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-x-3">

@@ -26,13 +26,14 @@ public class FileStats {
         JsonObject stats = new JsonObject();
         stats.addProperty("totalLines", lines.size());
         stats.addProperty("blankLines", blankLines);
+        stats.addProperty("nonBlankLines", lines.size() - blankLines);
         stats.addProperty("longestLine", longestLine);
 
-        // Add file stats and code notes to the AI review.
+        // Add the stats and the downloadable text to the AI review.
         try {
             JsonObject result = JsonParser.parseString(review).getAsJsonObject();
             result.add("fileStats", stats);
-            result.add("codeNotes", CodeNotes.find(lines));
+            result.addProperty("reportText", ReviewText.build(result));
             return result.toString();
         } catch (RuntimeException error) {
             throw new IOException("Groq sent an unreadable review. Try again.", error);
