@@ -1,39 +1,35 @@
 package reviewx;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class ReviewText {
     public static String build(JsonObject review) {
-        // Start the text report with the numbers Java calculated.
+        // Start with the file stats, then add each part of the review.
         JsonObject stats = review.getAsJsonObject("fileStats");
-        StringBuilder text = new StringBuilder("ReviewX review\n\n");
-        text.append("File stats\n");
-        text.append("Total lines: " + stats.get("totalLines").getAsInt() + "\n");
-        text.append("Non-blank lines: " + stats.get("nonBlankLines").getAsInt() + "\n");
-        text.append("Blank lines: " + stats.get("blankLines").getAsInt() + "\n");
-        text.append("Longest line: " + stats.get("longestLine").getAsInt() + " chars\n\n");
+        String report = "ReviewX review\n\nFile stats\n";
+        report += "Total lines: " + stats.get("totalLines") + "\n";
+        report += "Non-blank lines: " + stats.get("nonBlankLines") + "\n";
+        report += "Blank lines: " + stats.get("blankLines") + "\n";
+        report += "Longest line: " + stats.get("longestLine") + " chars\n\n";
 
-        text.append("Summary\n");
-        text.append(review.get("summary").getAsString()).append("\n\n");
+        String summary = review.get("summary").getAsString();
+        report += "Summary\n" + summary + "\n\nReview points\n";
 
-        // Give each AI review point a number in the download.
-        text.append("Review points\n");
-        JsonArray points = review.getAsJsonArray("points");
+        // Read each point and add its title and detail to the report.
         int number = 1;
-        for (JsonElement item : points) {
+        for (JsonElement item : review.getAsJsonArray("points")) {
             JsonObject point = item.getAsJsonObject();
-            text.append(number + ". " + point.get("title").getAsString() + "\n");
-            text.append("   " + point.get("detail").getAsString() + "\n\n");
+            String title = point.get("title").getAsString();
+            String detail = point.get("detail").getAsString();
+            report += number + ". " + title + "\n   " + detail + "\n\n";
             number++;
         }
 
         String code = review.get("cleanedCode").getAsString();
         if (!code.isBlank()) {
-            text.append("Cleaned-up code\n");
-            text.append(code.stripTrailing()).append('\n');
+            report += "Cleaned-up code\n" + code.stripTrailing() + "\n";
         }
-        return text.toString();
+        return report;
     }
 }

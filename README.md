@@ -27,7 +27,7 @@ The `<` tells the terminal to give Java the file as input. You’ll see the same
 2. **`Reviewer.java`** is an interface. Its one method says what a reviewer takes in and sends back.
 3. **`GroqReviewer.java`** stores the key in its constructor, sends the instructions and file text to Groq, and reads the response. The prompt and the expected response fields live in `groq-request.json`.
 4. **`FileStats.java`** uses a list and a loop to count lines and adds file stats to the review.
-5. **`ReviewText.java`** builds the downloadable review using a `StringBuilder` and a loop.
+5. **`ReviewText.java`** builds the downloadable review by joining strings and looping through the review points.
 
 The only library used by Java is Gson, which handles JSON. Next.js starts Java when a file arrives and reads the program’s output.
 

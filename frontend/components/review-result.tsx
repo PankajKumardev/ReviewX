@@ -37,17 +37,7 @@ export function ReviewResult({ review }: { review: ReviewData }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "done" | "error">("idle");
   const code = review.cleanedCode.trimEnd().replace(/^```[^\n]*\n([\s\S]*?)\n```$/, "$1");
 
-  function downloadReview() {
-    const file = new Blob([review.reportText], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "reviewx-review.txt";
-    document.body.append(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
+  const downloadUrl = "data:text/plain;charset=utf-8," + encodeURIComponent(review.reportText);
 
   async function copyCode() {
     try {
@@ -64,9 +54,11 @@ export function ReviewResult({ review }: { review: ReviewData }) {
         <div className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold">File stats</h3>
-            <Button type="button" size="sm" variant="outline" onClick={downloadReview}>
-              <Download aria-hidden="true" />
-              Download review
+            <Button asChild size="sm" variant="outline">
+              <a href={downloadUrl} download="reviewx-review.txt">
+                <Download aria-hidden="true" />
+                Download review
+              </a>
             </Button>
           </div>
           <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
