@@ -35,4 +35,6 @@ The only library used by Java is Gson, which handles JSON. Next.js starts Java w
 
 See [ROLES.md](ROLES.md) for each member’s Java and frontend features.
 
+See [JAVA_CONCEPTS.md](JAVA_CONCEPTS.md) for the list of Java concepts used.
+
 Use the [Java Backend Guide](docs/ReviewX-Java-Backend-Guide.docx) for the complete line-by-line walkthrough, the reading order, and the syllabus concepts used in the project.
